@@ -25,7 +25,7 @@
         zephyr,code-partition = &code_partition;
         zmk,kscan = &kscan0;
         zmk,matrix-transform = &default_transform;
-        // zmk,underglow = &ws2812;
+        zmk,underglow = &ws2812;
     };
 
     xtal_clk: xtal-clk {
