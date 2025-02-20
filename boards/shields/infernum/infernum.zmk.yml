@@ -1,9 +1,0 @@
-file_format: "1"
-id: infernum
-name: infernum
-type: shield
-url: https://github.com/HaiZeus0411/Infernum-Files/
-requires: 
-  - seeeduino_xiao_rp2040
-features:
-  - keys

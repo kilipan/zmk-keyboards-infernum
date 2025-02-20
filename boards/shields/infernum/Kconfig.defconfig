@@ -1,8 +1,0 @@
-# SPDX-License-Identifier: MIT
-
-if SHIELD_INFERNUM
-
-config ZMK_KEYBOARD_NAME
-    default "infernum"
-
-endif
