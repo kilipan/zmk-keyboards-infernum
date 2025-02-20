@@ -1,0 +1,183 @@
+/*
+ * Copyright (c) 2024 The ZMK Contributors
+ * SPDX-License-Identifier: MIT
+ */
+
+/dts-v1/;
+
+#include <rpi_pico/rp2040.dtsi>
+#include <dt-bindings/zmk/matrix_transform.h>
+#include <dt-bindings/led/led.h>
+#include <dt-bindings/pinctrl/rpi-pico-rp2040-pinctrl.h>
+
+
+/ {
+    model = "Infernum";
+	compatible = "raspberrypi,rp2040";
+
+    chosen {
+        zephyr,sram = &sram0;
+        zephyr,flash = &flash0;
+		zephyr,flash-controller = &ssi; //?? pete only
+		// zephyr,console = &uart0; //?? pete only, but not sure whether special uart is needed for non-split
+        zephyr,console = &cdc_acm_uart; //?? de60 only
+        // zephyr,shell-uart = &cdc_acm_uart; //?? de60 only
+        zephyr,code-partition = &code_partition;
+        zmk,kscan = &kscan0;
+        zmk,matrix-transform = &default_transform;
+        // zmk,underglow = &ws2812;
+    };
+
+    xtal_clk: xtal-clk {
+        compatible = "fixed-clock";
+        clock-frequency = <12000000>;
+        #clock-cells = <0>;
+    };
+
+    double_3u_transform: keymap_transform_0 {
+        compatible = "zmk,matrix-transform";
+        columns = <10>;
+        rows = <4>;
+        map = <
+			RC(0,0) RC(0,1) RC(0,2) RC(0,3) RC(0,4) RC(3,1) RC(0,5) RC(0,6) RC(0,7) RC(0,8) RC(0,9)
+			RC(1,0) RC(1,1) RC(1,2) RC(1,3) RC(1,4)         RC(1,5) RC(1,6) RC(1,7) RC(1,8) RC(1,9)
+			RC(2,0) RC(2,1) RC(2,2) RC(2,3) RC(2,4)         RC(2,5) RC(2,6) RC(2,7) RC(2,8) RC(2,9)
+			             RC(3,2)        RC(3,4)     RC(3,9)     RC(3,5)        RC(3,7) 
+        >;
+    };
+
+    default_transform: keymap_transform_1 {
+        compatible = "zmk,matrix-transform";
+        columns = <10>;
+        rows = <4>;
+        map = <
+			RC(0,0) RC(0,1) RC(0,2) RC(0,3) RC(0,4) RC(3,1) RC(0,5) RC(0,6) RC(0,7) RC(0,8) RC(0,9)
+			RC(1,0) RC(1,1) RC(1,2) RC(1,3) RC(1,4)         RC(1,5) RC(1,6) RC(1,7) RC(1,8) RC(1,9)
+			RC(2,0) RC(2,1) RC(2,2) RC(2,3) RC(2,4)         RC(2,5) RC(2,6) RC(2,7) RC(2,8) RC(2,9)
+			             RC(3,2)  RC(3,3)  RC(3,4)  RC(3,9)  RC(3,5)  RC(3,6)  RC(3,7) 
+        >;
+    };
+ 
+    encoder_1: encoder_1 {
+        compatible = "alps,ec11";
+        label = "Encoder 1";
+        a-gpios = <&gpio0 28 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>;
+        b-gpios = <&gpio0 27 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>;
+        resolution = <4>;
+        status = "okay";
+    };
+
+    encoder_2: encoder_2 {
+        compatible = "alps,ec11";
+        label = "Encoder 2";
+        a-gpios = <&gpio0 12 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>;
+        b-gpios = <&gpio0 11 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>;
+        resolution = <4>;
+        status = "okay";
+    };
+
+    kscan0: kscan {
+        compatible = "zmk,kscan-gpio-matrix";
+        diode-direction = "col2row";
+        wakeup-source;
+        row-gpios
+            = <&gpio0 8 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>
+            , <&gpio0 9 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>
+            , <&gpio0 14 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>
+            , <&gpio0 10 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>
+            ;
+        col-gpios
+            = <&gpio0 18 GPIO_ACTIVE_HIGH>
+            , <&gpio0 13 GPIO_ACTIVE_HIGH>
+            , <&gpio0 0 GPIO_ACTIVE_HIGH>
+            , <&gpio0 1 GPIO_ACTIVE_HIGH>
+            , <&gpio0 2 GPIO_ACTIVE_HIGH>
+            , <&gpio0 3 GPIO_ACTIVE_HIGH>
+            , <&gpio0 4 GPIO_ACTIVE_HIGH>
+            , <&gpio0 5 GPIO_ACTIVE_HIGH>
+            , <&gpio0 6 GPIO_ACTIVE_HIGH>
+            , <&gpio0 7 GPIO_ACTIVE_HIGH>
+            ;
+    };
+};
+
+&flash0 {
+	/* 8MB of flash minus the 0x100 used for
+	 * the second stage bootloader
+	 */
+    reg = <0x10000000 DT_SIZE_M(16)>;
+
+    partitions {
+        compatible = "fixed-partitions";
+        #address-cells = <1>;
+        #size-cells = <1>;
+
+        /* Reserved memory for the second stage bootloader */ //?? de60 only
+        // second_stage_bootloader: partition@0 {
+        //     reg = <0x00000000 0x100>;
+        //     read-only;
+        // };
+
+		/*
+		 * Start at the beginning of usable flash, 8MB minus the
+		 * second stage space and the 16 KiB reserved for settings
+		 */
+        code_partition: partition@100 {
+            reg = <0x100 (DT_SIZE_M(16) - 0x100 - DT_SIZE_K(512))>; //?? pete
+            // reg = <0x100 (DT_SIZE_M(16) - 0x100)>; //?? de60
+            read-only;
+        };
+
+		storage_partition: partition@180000 { //?? pete only
+			reg = <0xf80000 DT_SIZE_K(512)>;
+			read-only;
+		};
+    };
+};
+
+
+&usbd {
+  status = "okay";
+  cdc_acm_uart: cdc_acm_uart {
+    compatible = "zephyr,cdc-acm-uart";
+  };
+};
+
+
+//?? de60 only, seems needed for underglow(?)
+&gpio0 {
+    status = "okay";
+};
+
+&pinctrl {
+	ws2812_pio0_default: ws2812_pio0_default {
+		ws2812 {
+			pinmux = <PIO0_P29>;
+		};
+	};
+};
+
+&pio0 {
+	status = "okay";
+
+	pio-ws2812 {
+		compatible = "worldsemi,ws2812-rpi_pico-pio";
+		status = "okay";
+		pinctrl-0 = <&ws2812_pio0_default>;
+		pinctrl-names = "default";
+		bit-waveform = <3>, <3>, <4>;
+
+		ws2812: ws2812 {
+			status = "okay";
+			gpios = <&gpio0 29 GPIO_ACTIVE_HIGH>;
+			chain-length = <22>;
+			color-mapping = <LED_COLOR_ID_GREEN
+					 LED_COLOR_ID_RED
+					 LED_COLOR_ID_BLUE>;
+			reset-delay = <280>;
+			frequency = <800000>;
+		};
+	};
+
+    
+};

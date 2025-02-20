@@ -1,0 +1,10 @@
+#include <physical_layouts.dtsi>
+
+/ {
+	infernum_layout: infernum_layout {
+		compatible = "zmk,physical-layout";
+		display-name = "Infernum";
+		transform = <&default_transform>;
+		kscan = <&default_kscan>;
+	};
+};

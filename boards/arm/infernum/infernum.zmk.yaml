@@ -1,0 +1,12 @@
+file_format: "1"
+id: infernum
+name: Infernum
+type: board
+arch: arm
+features:
+  - keys
+  - encoder
+  - underglow
+outputs:
+  - usb
+url: https://github.com/HaiZeus0411/Infernum-Files

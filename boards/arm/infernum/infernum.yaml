@@ -1,0 +1,15 @@
+identifier: infernum
+name: Infernum
+type: mcu
+arch: arm
+flash: 16384
+ram: 264
+toolchain:
+  - zephyr
+  - gnuarmemb
+  - xtools
+supported:
+  - gpio
+  - usb_device
+  - hwinfo
+  - pwm
