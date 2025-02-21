@@ -1,9 +1,0 @@
-// enable the required encoders here by commenting in/out the appropriate sections
-
-&top_encoder {
-    status = "okay";
-};
-
-&bottom_encoder {
-    status = "okay";
-};
